@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Agendamentos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .agendamentos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .agendamentos-table th,
+        .agendamentos-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .agendamentos-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .agendamentos-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .admin-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .agendamentos-table {
+                font-size: 14px;
+            }
+
+            .agendamentos-table th,
+            .agendamentos-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Painel de Administração - Agendamentos</h1>
+        
+        <div class="admin-actions">
+            <a href="/" class="btn btn-primary">Voltar ao Formulário</a>
+            <button onclick="carregarAgendamentos()" class="btn btn-success">Atualizar Lista</button>
+            <button onclick="baixarRelatorio()" class="btn btn-success">Baixar Relatório CSV</button>
+            <button onclick="limparTodosAgendamentos()" class="btn btn-danger">Limpar Todos os Dados</button>
+        </div>
+
+        <div id="message" class="message" style="display: none;"></div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Carregando agendamentos...
+        </div>
+
+        <div id="agendamentos-container">
+            <div id="no-data" class="no-data" style="display: none;">
+                Nenhum agendamento encontrado.
+            </div>
+            <table id="agendamentos-table" class="agendamentos-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Professor</th>
+                        <th>Colégio</th>
+                        <th>Categoria</th>
+                        <th>Data</th>
+                        <th>Período</th>
+                        <th>Horário</th>
+                    </tr>
+                </thead>
+                <tbody id="agendamentos-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        async function carregarAgendamentos() {
+            showLoading(true);
+            
+            try {
+                const response = await fetch('/api/agendamentos');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    exibirAgendamentos(data.agendamentos);
+                } else {
+                    showMessage('Erro ao carregar agendamentos: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro de conexão: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function exibirAgendamentos(agendamentos) {
+            const tbody = document.getElementById('agendamentos-tbody');
+            const table = document.getElementById('agendamentos-table');
+            const noData = document.getElementById('no-data');
+            
+            tbody.innerHTML = '';
+            
+            if (agendamentos.length === 0) {
+                table.style.display = 'none';
+                noData.style.display = 'block';
+            } else {
+                noData.style.display = 'none';
+                table.style.display = 'table';
+                
+                agendamentos.forEach(agendamento => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${agendamento.id}</td>
+                        <td>${agendamento.nome_professor}</td>
+                        <td>${agendamento.nome_colegio}</td>
+                        <td>${agendamento.categoria}</td>
+                        <td>${agendamento.data_apresentacao}</td>
+                        <td>${agendamento.periodo}</td>
+                        <td>${agendamento.horario}</td>
+                    `;
+                });
+            }
+        }
+
+        async function baixarRelatorio() {
+            try {
+                const response = await fetch('/api/agendamentos/relatorio');
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'relatorio_agendamentos.csv';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    showMessage('Relatório baixado com sucesso!', 'success');
+                } else {
+                    showMessage('Erro ao baixar relatório', 'error');
+                }
+            } catch (error) {
+                showMessage('Erro de conexão: ' + error.message, 'error');
+            }
+        }
+
+        async function limparTodosAgendamentos() {
+            if (!confirm('Tem certeza que deseja apagar TODOS os agendamentos? Esta ação não pode ser desfeita!')) {
+                return;
+            }
+            
+            if (!confirm('CONFIRMAÇÃO FINAL: Todos os dados serão perdidos permanentemente. Continuar?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/agendamentos/limpar', {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    carregarAgendamentos(); // Recarregar a lista
+                } else {
+                    showMessage('Erro ao limpar agendamentos: ' + data.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro de conexão: ' + error.message, 'error');
+            }
+        }
+
+        // Carregar agendamentos quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarAgendamentos();
+        });
+    </script>
+</body>
+</html>
+

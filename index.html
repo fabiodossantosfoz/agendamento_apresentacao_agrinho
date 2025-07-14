@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento de Apresentações</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Agendamento de Apresentações dos Projetos Agrinho</h1>
+        <form id="agendamentoForm">
+            <div class="form-group">
+                <label for="nomeProfessor">Nome do Professor:</label>
+                <input type="text" id="nomeProfessor" required>
+            </div>
+            <div class="form-group">
+                <label for="nomeColegio">Nome do Colégio:</label>
+                <input type="text" id="nomeColegio" required>
+            </div>
+            <div class="form-group">
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" required>
+                    <option value="">Selecione</option>
+                    <option value="Fundamental">Ensino Fundamental</option>
+                    <option value="Medio">Ensino Médio</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dataApresentacao">Data da Apresentação:</label>
+                <select id="dataApresentacao" required>
+                    <option value="">Selecione</option>
+                    <option value="29/07/2024">Terça-Feira, 29/07/2024</option>
+                    <option value="30/07/2024">Quarta-Feira, 30/07/2024</option>
+                    <option value="01/08/2024">Sexta-Feira, 01/08/2024</option>
+                    <option value="04/08/2024">Segunda-Feira, 04/08/2024</option>
+                    <option value="05/08/2024">Terça-Feira, 05/08/2024</option>
+                    <option value="06/08/2024">Quarta-Feira, 06/08/2024</option>
+                    <option value="08/08/2024">Sexta-Feira, 08/08/2024</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="periodo">Período:</label>
+                <select id="periodo" required>
+                    <option value="">Selecione</option>
+                    <option value="Manha">Manhã (08:30-11:00)</option>
+                    <option value="Tarde">Tarde (14:00-16:00)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="horario">Horário:</label>
+                <select id="horario" required>
+                    <option value="">Selecione</option>
+                </select>
+            </div>
+            <button type="submit">Agendar Apresentação</button>
+        </form>
+        <div id="message" class="message"></div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
+
+
+
+
+
